@@ -1,0 +1,58 @@
+import java.text.SimpleDateFormat
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow'  version '1.2.3'
+}
+
+group project_group
+version project_version
+mainClassName = class_main
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/releases" }
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit'                          , name: 'junit'                                 , version: '4.12'
+    compileOnly group: 'org.projectlombok'              , name: 'lombok'                                , version: lombok_version
+    compile     group: 'ch.qos.logback'                 , name: 'logback-classic'                       , version: logback_version
+    compile     group: 'org.deeplearning4j'             , name: 'deeplearning4j-nn'                     , version: deeplearning4j_version
+    compile     group: 'org.deeplearning4j'             , name: 'deeplearning4j-parallel-wrapper_2.11'  , version: deeplearning4j_version
+    compile     group: 'org.nd4j'                       , name: 'nd4j-cuda-9.1-platform'                , version: deeplearning4j_version   , classifier:'linux-x86_64'
+    compile     group: 'org.nd4j'                       , name: 'nd4j-native-platform'                  , version: deeplearning4j_version   , classifier:'linux-x86_64'
+    compile     group: 'org.nd4j'                       , name: 'nd4j-native'                           , version: deeplearning4j_version   , classifier:'linux-x86_64'
+    compile     group: 'org.bytedeco.javacpp-presets'   , name: 'openblas'                              , version: openblas_version         , classifier:'linux-x86_64'
+//    compile     group: 'org.deeplearning4j' , name: 'dl4j-spark_2.11'                       , version: deeplearning4j_version + '_spark_2'
+}
+
+jar {
+    doFirst {
+        manifest {
+            attributes( "Implementation-Title": project_name,
+                        "Implementation-Version": project_version,
+                        "Implementation-Vendor": provider,
+                        "Product-Name": project_name,
+                        "provider": provider,
+                        "Main-Class": class_main,
+                        "Class-Path": configurations.compile.collect { it.getName() }.join(' '),
+                        "Created-By": lab_creator,
+                        "relevant": "Application.",
+                        "Build-Date": new SimpleDateFormat("yyyy-MM-dd").format(new Date()),
+                        "Build-JDK": System.getProperty("java.version"),
+                        "Build-Gradle": project.gradle.gradleVersion
+            )
+        }
+    }
+}
+
+shadowJar {
+    classifier  = null
+    zip64 = true
+    version = project_version
+    baseName = project_name
+}
